@@ -193,7 +193,10 @@ class _PromoFieldState extends ConsumerState<_PromoField> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final applied = ref.watch(cartProvider.select((c) => c.promoCode));
+    // Driven by computed totals, not the stored code — "applied" only shows
+    // when the discount is actually in effect (e.g. min order still met).
+    final applied =
+        ref.watch(cartTotalsProvider).valueOrNull?.promoApplied;
 
     if (applied != null) {
       return Row(
@@ -202,7 +205,7 @@ class _PromoFieldState extends ConsumerState<_PromoField> {
               size: 18, color: AppPalette.success),
           const SizedBox(width: Gap.sm),
           Text(
-            l10n.promoApplied(applied),
+            l10n.promoApplied(applied.code),
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium
@@ -239,10 +242,14 @@ class _PromoFieldState extends ConsumerState<_PromoField> {
     );
   }
 
-  void _apply() {
-    final ok =
-        ref.read(cartProvider.notifier).applyPromo(_controller.text);
-    setState(() => _error = ok ? null : context.l10n.promoInvalid);
+  Future<void> _apply() async {
+    final totals = await ref.read(cartTotalsProvider.future);
+    final ok = ref
+        .read(cartProvider.notifier)
+        .applyPromo(_controller.text, totals.subtotal);
+    if (mounted) {
+      setState(() => _error = ok ? null : context.l10n.promoInvalid);
+    }
   }
 }
 

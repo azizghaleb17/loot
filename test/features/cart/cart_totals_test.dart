@@ -77,6 +77,14 @@ void main() {
       expect(t.tax, Money.zero);
     });
 
+    test('findEligiblePromo rejects codes below their minimum order', () {
+      expect(findEligiblePromo('FREESHIP', const Money(4000)), isNull);
+      expect(findEligiblePromo('FREESHIP', const Money(5000))?.code, 'FREESHIP');
+      expect(findEligiblePromo('loot10', const Money(100))?.code, 'LOOT10');
+      expect(findEligiblePromo('NOPE', const Money(99000)), isNull);
+      expect(findEligiblePromo(null, const Money(99000)), isNull);
+    });
+
     test('empty cart totals are all zero', () {
       final t = CartTotals.compute(const [], null);
       expect(t.subtotal, Money.zero);

@@ -35,8 +35,11 @@ begin
     raise exception 'EMPTY_CART';
   end if;
 
-  -- Lock variants in a stable order to avoid deadlocks; validate stock & price.
-  foreach v_item in array p_items loop
+  -- Lock variants sorted by id — a stable order across all concurrent
+  -- checkouts, so carts [X,Y] and [Y,X] can't deadlock each other.
+  for v_item in
+    select t.variant_id, t.qty from unnest(p_items) as t order by t.variant_id
+  loop
     select pv.id, pv.price_fils, pv.stock_qty, pv.product_id
       into v_variant
       from product_variants pv

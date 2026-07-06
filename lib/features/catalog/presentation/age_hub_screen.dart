@@ -66,8 +66,10 @@ class _AgeHubScreenState extends ConsumerState<AgeHubScreen> {
                 const SizedBox(height: Gap.xl),
                 ListingResults(
                   query: _query,
-                  onQueryChanged: (q) => setState(
-                      () => _query = q.copyWith(ageSlugs: {widget.ageSlug})),
+                  // Keep this hub's age pinned but preserve any extra ages the
+                  // user adds in the filter sheet.
+                  onQueryChanged: (q) => setState(() => _query =
+                      q.copyWith(ageSlugs: {widget.ageSlug, ...q.ageSlugs})),
                 ),
               ],
             ),

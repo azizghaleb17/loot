@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 
+import '../../../core/utils/money.dart';
 import '../../catalog/presentation/providers.dart';
 import '../domain/cart.dart';
 
@@ -75,13 +76,13 @@ class CartNotifier extends Notifier<CartState> {
     _persist();
   }
 
-  /// Applies a promo code; returns false when the code is invalid so the
-  /// field can show an error without changing state.
-  bool applyPromo(String code) {
-    final normalized = code.trim().toUpperCase();
-    final valid = demoPromos.any((p) => p.code == normalized);
-    if (!valid) return false;
-    state = state.copyWith(promoCode: () => normalized);
+  /// Applies a promo code; returns false when the code is invalid or the
+  /// subtotal is below the promo's minimum, so the field can show an error
+  /// instead of a false "applied" state.
+  bool applyPromo(String code, Money subtotal) {
+    final promo = findEligiblePromo(code, subtotal);
+    if (promo == null) return false;
+    state = state.copyWith(promoCode: () => promo.code);
     _persist();
     return true;
   }

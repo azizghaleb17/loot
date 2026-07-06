@@ -72,6 +72,17 @@ const demoPromos = <Promo>[
 const flatShipping = Money(2000); // 2.000 KD
 const freeShippingMin = Money(15000); // free ≥ 15.000 KD
 
+/// Single eligibility rule shared by [CartTotals.compute] and the apply-promo
+/// UI, so "applied" is only ever shown when the discount actually applies.
+Promo? findEligiblePromo(String? code, Money subtotal) {
+  if (code == null) return null;
+  final normalized = code.trim().toUpperCase();
+  for (final promo in demoPromos) {
+    if (promo.code == normalized && subtotal >= promo.minOrder) return promo;
+  }
+  return null;
+}
+
 /// A cart line joined with its catalog product/variant, ready to render.
 @immutable
 class ResolvedLine {
@@ -117,24 +128,17 @@ class CartTotals {
         ? Money.zero
         : flatShipping;
     var discount = Money.zero;
-    Promo? applied;
 
-    if (promoCode != null) {
-      for (final promo in demoPromos) {
-        if (promo.code == promoCode.toUpperCase() && subtotal >= promo.minOrder) {
-          applied = promo;
-          switch (promo.type) {
-            case PromoType.percent:
-              discount = subtotal.percent(promo.value);
-            case PromoType.fixed:
-              discount = Money(promo.value) <= subtotal
-                  ? Money(promo.value)
-                  : subtotal;
-            case PromoType.freeShipping:
-              shipping = Money.zero;
-          }
-          break;
-        }
+    final applied = findEligiblePromo(promoCode, subtotal);
+    if (applied != null) {
+      switch (applied.type) {
+        case PromoType.percent:
+          discount = subtotal.percent(applied.value);
+        case PromoType.fixed:
+          discount =
+              Money(applied.value) <= subtotal ? Money(applied.value) : subtotal;
+        case PromoType.freeShipping:
+          shipping = Money.zero;
       }
     }
 

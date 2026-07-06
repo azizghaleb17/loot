@@ -42,8 +42,9 @@ class _BrandScreenState extends ConsumerState<BrandScreen> {
                 ),
                 ListingResults(
                   query: _query,
-                  onQueryChanged: (q) => setState(() =>
-                      _query = q.copyWith(brandSlugs: {widget.brandSlug})),
+                  // Pin this brand but preserve extra brands from the sheet.
+                  onQueryChanged: (q) => setState(() => _query = q.copyWith(
+                      brandSlugs: {widget.brandSlug, ...q.brandSlugs})),
                 ),
               ],
             ),
