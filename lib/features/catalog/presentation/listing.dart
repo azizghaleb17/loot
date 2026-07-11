@@ -7,6 +7,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/product_card.dart';
+import '../../../core/widgets/shimmer.dart';
 import '../domain/models.dart';
 import 'providers.dart';
 
@@ -61,10 +62,7 @@ class ListingResults extends ConsumerWidget {
         _ActiveFilterChips(query: query, onQueryChanged: onQueryChanged),
         const SizedBox(height: Gap.lg),
         results.when(
-          loading: () => const Padding(
-            padding: EdgeInsetsDirectional.all(Gap.xxl),
-            child: Center(child: CircularProgressIndicator()),
-          ),
+          loading: () => const GridSkeleton(),
           error: (e, _) =>
               ErrorView(onRetry: () => ref.invalidate(catalogQueryProvider(query))),
           data: (items) => items.isEmpty

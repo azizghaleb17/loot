@@ -7,6 +7,7 @@ import '../../../core/theme/palette.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/product_card.dart';
+import '../../../core/widgets/shimmer.dart';
 import '../domain/models.dart';
 import 'providers.dart';
 
@@ -140,7 +141,7 @@ class _AgeRail extends ConsumerWidget {
     final isAr = context.isArabic;
 
     return ages.when(
-      loading: () => const SizedBox(height: 120),
+      loading: () => const AgeRailSkeleton(),
       error: (e, _) => ErrorView(onRetry: () => ref.invalidate(ageGroupsProvider)),
       data: (groups) => LayoutBuilder(
         builder: (context, constraints) {
@@ -234,8 +235,7 @@ class _ProductShelf extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(provider);
     return products.when(
-      loading: () => const SizedBox(
-          height: 300, child: Center(child: CircularProgressIndicator())),
+      loading: () => const ShelfSkeleton(),
       error: (e, _) => ErrorView(onRetry: () => ref.invalidate(provider)),
       data: (items) => SizedBox(
         height: 340,
@@ -287,7 +287,9 @@ class _CategoryGrid extends ConsumerWidget {
     final categories = ref.watch(categoriesProvider);
     final isAr = context.isArabic;
     return categories.when(
-      loading: () => const SizedBox(height: 200),
+      loading: () => const Shimmer(
+        child: SkeletonBox(height: 200, radius: Corners.card),
+      ),
       error: (e, _) =>
           ErrorView(onRetry: () => ref.invalidate(categoriesProvider)),
       data: (items) => GridView.builder(

@@ -10,6 +10,7 @@ import '../../../core/utils/money.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/price_text.dart';
 import '../../../core/widgets/product_card.dart';
+import '../../../core/widgets/shimmer.dart';
 import '../../../core/widgets/sticker_tile.dart';
 import '../../cart/presentation/cart_providers.dart';
 import '../../wishlist/presentation/wishlist_providers.dart';
@@ -38,7 +39,9 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
     final productAsync = ref.watch(productBySlugProvider(widget.productSlug));
 
     return productAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SafeArea(
+        child: ContentClamp(child: ProductPageSkeleton()),
+      ),
       error: (e, _) => ErrorView(
           onRetry: () =>
               ref.invalidate(productBySlugProvider(widget.productSlug))),
